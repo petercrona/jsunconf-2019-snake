@@ -1,0 +1,21 @@
+{
+  "name": "snake",
+  "version": "1.0.0",
+  "description": "JSUnconf snake game example",
+  "main": "build-node/model.js",
+  "dependencies": {
+    "ramda": "^0.26.1",
+    "terminal-kit": "^1.27.2"
+  },
+  "devDependencies": {
+    "rollup": "^1.7.4",
+    "typescript": "^3.4.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "author": "",
+  "license": "ISC"
+}

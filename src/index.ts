@@ -81,11 +81,11 @@ setInterval(() => {
 // Key handling
 term.grabInput(true) ;
 term.on('key', R.cond([
-		[R.equals('UP'), () => game = moveUp(game)],
-		[R.equals('DOWN'), () => game = moveDown(game)],
-		[R.equals('RIGHT'), () => game = moveRight(game)],
-		[R.equals('LEFT'), () => game = moveLeft(game)],
-		[R.equals('r'), () => game = newGame(getSeed())],
-		[R.equals('q'), terminate],
-		[R.equals('CTRL_C'), terminate]
+	[R.equals('UP'), () => game = moveUp(game)],
+	[R.equals('DOWN'), () => game = moveDown(game)],
+	[R.equals('RIGHT'), () => game = moveRight(game)],
+	[R.equals('LEFT'), () => game = moveLeft(game)],
+	[R.equals('r'), () => game = newGame(getSeed())],
+	[R.equals('q'), terminate],
+	[R.equals('CTRL_C'), terminate]
 ]));

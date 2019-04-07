@@ -2,21 +2,21 @@
   "name": "jsunconf-2019-snake-model",
   "version": "1.0.0",
   "description": "JSUnconf 2019 snake model",
-  "main": "build-node/index.js",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "dependencies": {
-    "ramda": "^0.26.1",
-    "terminal-kit": "^1.27.2"
-  },
-  "devDependencies": {
+    "@types/node": "^11.13.0",
     "@types/ramda": "^0.26.6",
-    "rollup": "^1.7.4",
+    "ramda": "^0.26.1",
+    "terminal-kit": "^1.27.2",
     "typescript": "^3.4.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "example": "node build/example.js"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "Peter Crona",
+  "license": "MIT"
 }

@@ -165,7 +165,7 @@ isPossibleMove = R.useWith(
     ]
 );
 
-export let move: (movementVector: Vector, game: Game) => Game;
+export let move: (movementVector: Vector) => (game: Game) => Game;
 move = R.ifElse(
     isPossibleMove,
     R.set(movementVectorLens),

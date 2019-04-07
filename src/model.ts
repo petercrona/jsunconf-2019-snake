@@ -1,7 +1,7 @@
 import * as R from 'ramda';
 import { mb32 } from './prng';
 import { getWallPositions, removeOldApples, updateApplesTtl, isGameRunning, isSnakeAtTargetLength, getNextSnakePosition, getFreePositions, incScore, growSnake, getApplePositions, getSnakeHead, getSnakeTail, gameOver, didSnakeCollideWithSelf, didCollideWithApple, removeAppleAtSnakeHead, didCollideWithWall, vectorAdd, noZeroes, move, updatePrevMovementVector } from './util';
-import { Snake, Game, Board } from './types';
+import { Snake, Game, Board, GameStatus, Vector } from './types';
 
 // === Constructors
 const newSnake = (): Snake => ({
@@ -32,10 +32,17 @@ const boardLens = R.lensPath(['board']);
 const applesLens = R.compose(boardLens, R.lensPath(['apples']));
 
 // === Modifiers
-export const moveUp = move([0, -1]);
-export const moveDown = move([0, 1]);
-export const moveRight = move([1, 0]);
-export const moveLeft = move([-1, 0]);
+export let moveUp: (game: Game) => Game;
+moveUp = move([0, -1]);
+
+export let moveDown: (game: Game) => Game;
+moveDown = move([0, 1]);
+
+export let moveRight: (game: Game) => Game;
+moveRight = move([1, 0]);
+
+export let moveLeft: (game: Game) => Game;
+moveLeft = move([-1, 0]);
 
 // === Game loop
 const shouldAddNewApple = (game: Game) => {
@@ -56,25 +63,29 @@ const addAppleToRandomPosition = (game: Game): Game => {
 	return R.over(applesLens, R.append(newApple), game);
 };
 
-const maybeAddNewApple = R.ifElse(
+let maybeAddNewApple: (game: Game) => Game;
+maybeAddNewApple = R.ifElse(
 	shouldAddNewApple,
 	addAppleToRandomPosition,
 	R.identity
 );
 
-const checkWallCollision = R.ifElse(
+let checkWallCollision: (game: Game) => Game;
+checkWallCollision = R.ifElse(
 	didCollideWithWall,
 	gameOver,
 	R.identity
 );
 
-const checkSnakeCollideWithSelf = R.ifElse(
+let checkSnakeCollideWithSelf: (game: Game) => Game;
+checkSnakeCollideWithSelf = R.ifElse(
 	didSnakeCollideWithSelf,
 	gameOver,
 	R.identity
 );
 
-const checkAppleCollision = R.ifElse(
+let checkAppleCollision: (game: Game) => Game;
+checkAppleCollision = R.ifElse(
 	didCollideWithApple,
 	R.compose(removeAppleAtSnakeHead, incScore, growSnake),
 	R.identity
@@ -91,13 +102,15 @@ const updateSnakePosition = (game: Game): Game => {
 	);
 };
 
-const checkAndHandleCollisions = R.compose(
+let checkAndHandleCollisions: (game: Game) => Game;
+checkAndHandleCollisions = R.compose(
 	checkWallCollision,
 	checkSnakeCollideWithSelf,
 	checkAppleCollision
 );
 
-export const tick = R.ifElse(
+export let tick: (game: Game) => Game;
+tick = R.ifElse(
 	isGameRunning,
 	R.compose(
 		maybeAddNewApple,
@@ -111,8 +124,17 @@ export const tick = R.ifElse(
 );
 
 // === Public Getters
-export const getScore = R.prop('score');
-export const getWalls = getWallPositions;
-export const getApples = R.compose(R.map(R.prop('pos')), R.view(applesLens));
-export const getSnake = R.view(snakePositionLens);
-export const getStatus = R.prop('status');
+export let getScore: (game: Game) => number;
+getScore = R.prop('score');
+
+export let getWalls: (game: Game) => Vector[];
+getWalls = getWallPositions;
+
+export let getApples: (game: Game) => Vector[];
+getApples = R.compose(R.map(R.prop('pos')), R.view(applesLens));
+
+export let getSnake: (game: Game) => Vector[];
+getSnake = R.view(snakePositionLens);
+
+export let getStatus: (game: Game) => GameStatus;
+getStatus = R.prop('status');

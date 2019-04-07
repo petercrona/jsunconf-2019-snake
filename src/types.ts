@@ -1,8 +1,10 @@
 export type Vector = [number, number];
 
+export type GameStatus = 'GAME_OVER' | 'GAME_RUNNING';
+
 export interface Game {
 	score: number;
-	status: 'GAME_OVER' | 'GAME_RUNNING';
+	status: GameStatus;
 	snake: Snake;
 	board: Board;
 	prng: () => number;

@@ -35,7 +35,7 @@ const decAppleTtl = R.over(R.lensProp('ttl'), R.dec);
 export const updateApplesTtl = R.over(applesLens, R.map(decAppleTtl));
 export const removeOldApples = R.over(applesLens, R.reject(appleExpired));
 
-export const getWallPositions = game => {
+export const getWallPositions = (game: Game) => {
 	const board = R.view(boardLens, game);
 	const width = board.width;
 	const height = board.height;

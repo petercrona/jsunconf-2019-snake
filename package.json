@@ -1,5 +1,5 @@
 {
-  "name": "jsunconf-2019-snake",
+  "name": "jsunconf-snake",
   "version": "1.0.0",
   "description": "JSUnconf 2019 snake model",
   "main": "build/index.js",

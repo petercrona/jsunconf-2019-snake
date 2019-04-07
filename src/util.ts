@@ -45,7 +45,8 @@ decAppleTtl = R.over(R.lensProp('ttl'), R.dec);
 export let updateApplesTtl: (game: Game) => Game;
 updateApplesTtl = R.over(applesLens, R.map(decAppleTtl));
 
-export const removeOldApples = R.over(applesLens, R.reject(appleExpired));
+export let removeOldApples: (game: Game) => Game;
+removeOldApples = R.over(applesLens, R.reject(appleExpired));
 
 export const getWallPositions = (game: Game) => {
     const board = R.view(boardLens, game);
@@ -57,10 +58,11 @@ export const getWallPositions = (game: Game) => {
         ...R.zip(R.range(0, width + 1), R.repeat(height, width + 1)),
         ...R.zip(R.repeat(0, height), R.range(0, height)),
         ...R.zip(R.repeat(width, height + 1), R.range(0, height + 1))
-    ];
+    ] as Vector[];
 };
 
-export const isGameRunning = R.compose(
+export let isGameRunning: (game: Game) => boolean;
+isGameRunning = R.compose(
     R.equals('GAME_RUNNING'),
     R.view(gameStatusLens)
 );
@@ -85,31 +87,40 @@ export const getFreePositions = (game: Game) => {
         possiblyFree[apple.pos] = false;
     }, apples);
 
-    return R.filter(R.identity, R.values(possiblyFree));
+    return R.filter(R.identity, R.values(possiblyFree)) as Vector[];
 };
 
-export const incScore = R.over(gameScoreLens, R.inc);
-export const growSnake = R.over(snakeLengthLens, R.inc);
+export let incScore: (game: Game) => Game;
+incScore = R.over(gameScoreLens, R.inc);
 
-export const getApplePositions = R.compose(
+export let growSnake: (game: Game) => Game;
+growSnake = R.over(snakeLengthLens, R.inc);
+
+export let getApplePositions: (game: Game) => Vector[];
+getApplePositions = R.compose(
     R.map(R.prop('pos')),
     R.view(applesLens)
 );
 
-export const getSnakeHead = R.compose(R.last, R.view(snakePositionLens));
+export let getSnakeHead: (game: Game) => Vector;
+getSnakeHead = R.compose(R.last, R.view(snakePositionLens));
 
-export const getSnakeTail = R.compose(R.init, R.view(snakePositionLens));
+export let getSnakeTail: (game: Game) => Vector[];
+getSnakeTail = R.compose(R.init, R.view(snakePositionLens));
 
-export const gameOver = R.set(gameStatusLens, 'GAME_OVER');
+export let gameOver: (game: Game) => Game;
+gameOver = R.set(gameStatusLens, 'GAME_OVER');
 
-export const didSnakeCollideWithSelf = R.lift(R.includes)(getSnakeHead, getSnakeTail);
+export let didSnakeCollideWithSelf: (game: Game) => boolean;
+didSnakeCollideWithSelf = R.lift(R.includes)(getSnakeHead, getSnakeTail);
 
-export const didCollideWithApple = R.lift(R.includes)(
+export let didCollideWithApple: (game: Game) => boolean;
+didCollideWithApple = R.lift(R.includes)(
     getSnakeHead,
     getApplePositions
 );
 
-export const removeAppleAtSnakeHead = game => {
+export const removeAppleAtSnakeHead = (game: Game) => {
     const isAppleAtSnakeHeadPosition = R.compose(
         R.equals(getSnakeHead(game)),
         R.prop('pos')
@@ -119,24 +130,34 @@ export const removeAppleAtSnakeHead = game => {
         applesLens,
         R.reject(isAppleAtSnakeHeadPosition),
         game
-    );
+    ) as Game;
 };
 
-const getX = R.nth(0);
-const getY = R.nth(1);
-const getBoardWidth = R.compose(R.prop('width'), R.view(boardLens));
-const getBoardHeight = R.compose(R.prop('height'), R.view(boardLens));
+let getX: (vector: Vector) => number;
+getX = R.nth(0);
 
-export const didCollideWithWall = R.anyPass([
+let getY: (vector: Vector) => number;
+getY = R.nth(1);
+
+let getBoardWidth: (game: Game) => number;
+getBoardWidth = R.compose(R.prop('width'), R.view(boardLens));
+
+let getBoardHeight: (game: Game) => number;
+getBoardHeight = R.compose(R.prop('height'), R.view(boardLens));
+
+export let didCollideWithWall: (game: Game) => boolean;
+didCollideWithWall = R.anyPass([
     R.useWith(R.lte(R.__, 0), [R.compose(getX, getSnakeHead)]),
     R.lift(R.gte)(R.compose(getX, getSnakeHead), getBoardWidth),
     R.useWith(R.lte(R.__, 0), [R.compose(getY, getSnakeHead)]),
     R.lift(R.gte)(R.compose(getY, getSnakeHead), getBoardHeight)
 ]);
 
-export const noZeroes = R.none(R.equals(0));
+export let noZeroes: (numbers: number[]) => boolean;
+noZeroes = R.none(R.equals(0));
 
-const isPossibleMove = R.useWith(
+let isPossibleMove: (movementVector: Vector, game: Game) => boolean;
+isPossibleMove = R.useWith(
     R.compose(noZeroes, vectorAdd),
     [
         R.identity,
@@ -144,13 +165,15 @@ const isPossibleMove = R.useWith(
     ]
 );
 
-export const move = R.ifElse(
+export let move: (movementVector: Vector, game: Game) => Game;
+move = R.ifElse(
     isPossibleMove,
     R.set(movementVectorLens),
     R.nthArg(1)
 );
 
-export const updatePrevMovementVector = R.lift(R.set(prevMovementVectorLens))(
+export let updatePrevMovementVector: (game: Game) => Game;
+updatePrevMovementVector = R.lift(R.set(prevMovementVectorLens))(
     R.view(movementVectorLens),
     R.identity
 );

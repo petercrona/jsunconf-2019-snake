@@ -18,7 +18,7 @@ const drawHeader = game => {
     sb.put({x: 1, y: 1, attr: {bold: true}}, status);
     sb.put({x: 40, y: 1, attr: {bold: true}}, 'Score: ' + score);
 
-    const widthOfLine = R.length('Score: ' + score) + 40
+    const widthOfLine = R.length('Score: ' + score as unknown as any[]) + 40
     term.moveTo(1, 2);
     R.range(1,widthOfLine).forEach((i) => {
         sb.put({x: i, y: 2}, "=");

@@ -1,7 +1,7 @@
 import * as R from 'ramda';
 import { mb32 } from './prng';
-import { getWallPositions, removeOldApples, updateApplesTtl, isGameRunning, isSnakeAtTargetLength, getNextSnakePosition, getFreePositions, incScore, growSnake, getApplePositions, getSnakeHead, getSnakeTail, gameOver, didSnakeCollideWithSelf, didCollideWithApple, removeAppleAtSnakeHead, didCollideWithWall, vectorAdd, noZeroes, move, updatePrevMovementVector } from './util';
-import { Snake, Game, Board, GameStatus, Vector } from './types';
+import { Board, Game, GameStatus, Snake, Vector, Apple } from './types';
+import { didCollideWithApple, didCollideWithWall, didSnakeCollideWithSelf, gameOver, getFreePositions, getNextSnakePosition, getWallPositions, growSnake, incScore, isGameRunning, isSnakeAtTargetLength, move, removeAppleAtSnakeHead, removeOldApples, updateApplesTtl, updatePrevMovementVector } from './util';
 
 // === Constructors
 const newSnake = (): Snake => ({
@@ -27,9 +27,9 @@ export const newGame = (seed: number): Game => ({
 
 // === Lenses
 const snakeLens = R.lensPath(['snake']);
-const snakePositionLens = R.compose(snakeLens, R.lensPath(['position']));
+const snakePositionLens = R.compose(snakeLens, R.lensPath(['position'])) as R.Lens;
 const boardLens = R.lensPath(['board']);
-const applesLens = R.compose(boardLens, R.lensPath(['apples']));
+const applesLens = R.compose(boardLens, R.lensPath(['apples'])) as R.Lens;
 
 // === Modifiers
 export let moveUp: (game: Game) => Game;
@@ -46,10 +46,10 @@ moveLeft = move([-1, 0]);
 
 // === Game loop
 const shouldAddNewApple = (game: Game) => {
-    const board = R.view(boardLens, game);
+    const board: Board = R.view(boardLens, game);
     const availableSpace = board.width * board.height;
-    const snake = R.view(snakeLens, game);
-    const apples = R.view(applesLens, game);
+    const snake: Snake = R.view(snakeLens, game);
+    const apples: Apple[] = R.view(applesLens, game);
     const usedSpace = snake.length + apples.length;
 
     return usedSpace < availableSpace && game.prng() <= 0.1;
@@ -130,8 +130,8 @@ getScore = R.prop('score');
 export let getWalls: (game: Game) => Vector[];
 getWalls = getWallPositions;
 
-export let getApples: (game: Game) => Vector[];
-getApples = R.compose(R.map(R.prop('pos')), R.view(applesLens));
+export const getApples = R.compose(R.map(R.prop('pos')), R.view(applesLens)) as 
+    (game: Game) => Vector[];
 
 export let getSnake: (game: Game) => Vector[];
 getSnake = R.view(snakePositionLens);

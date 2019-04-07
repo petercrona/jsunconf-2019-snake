@@ -13,7 +13,7 @@ export interface Game {
 export interface Snake {
     movementVector: Vector;
     prevMovementVector: Vector;
-    position: [Vector];
+    position: Vector[];
     length: number;
 }
 
@@ -25,5 +25,5 @@ export interface Board {
 
 export interface Apple {
     ttl: number,
-    pos: [Vector]
+    pos: Vector[]
 }

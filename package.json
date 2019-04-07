@@ -8,6 +8,7 @@
     "terminal-kit": "^1.27.2"
   },
   "devDependencies": {
+    "@types/ramda": "^0.26.6",
     "rollup": "^1.7.4",
     "typescript": "^3.4.1"
   },

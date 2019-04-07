@@ -1,91 +1,140 @@
 import * as R from 'ramda';
-import {getScore, getWalls, getApples, getSnake, getStatus, tick, moveDown, moveLeft, moveUp, moveRight, newGame} from './model';
+import { mb32 } from './prng';
+import { Board, Game, GameStatus, Snake, Vector, Apple } from './types';
+import { didCollideWithApple, didCollideWithWall, didSnakeCollideWithSelf, gameOver, getFreePositions, getNextSnakePosition, getWallPositions, growSnake, incScore, isGameRunning, isSnakeAtTargetLength, move, removeAppleAtSnakeHead, removeOldApples, updateApplesTtl, updatePrevMovementVector } from './util';
 
-const term = require('terminal-kit').terminal;
-const ScreenBuffer = require('terminal-kit').ScreenBuffer;
+// === Constructors
+const newSnake = (): Snake => ({
+    movementVector: [0, 1],
+    prevMovementVector: [0, 1],
+    position: [[10, 5]],
+    length: 4
+});
 
-var sb = new ScreenBuffer( { dst: term , noFill: true } ) ;
+const newBoard = (): Board => ({
+    width: 50,
+    height: 30,
+    apples: []
+});
 
-function terminate() {
-    term.grabInput( false ) ;
-    setTimeout( function() { process.exit() } , 100 ) ;
-}
+export const newGame = (seed: number): Game => ({
+    score: 0,
+    status: 'GAME_RUNNING',
+    snake: newSnake(),
+    board: newBoard(),
+    prng: mb32(seed)
+});
 
-const drawHeader = game => {
-    const status = getStatus(game);
-    const score = getScore(game);
+// === Lenses
+const snakeLens = R.lensPath(['snake']);
+const snakePositionLens = R.compose(snakeLens, R.lensPath(['position'])) as R.Lens;
+const boardLens = R.lensPath(['board']);
+const applesLens = R.compose(boardLens, R.lensPath(['apples'])) as R.Lens;
 
-    sb.put({x: 1, y: 1, attr: {bold: true}}, status);
-    sb.put({x: 40, y: 1, attr: {bold: true}}, 'Score: ' + score);
+// === Modifiers
+export let moveUp: (game: Game) => Game;
+moveUp = move([0, -1]);
 
-    const widthOfLine = R.length('Score: ' + score as unknown as any[]) + 40
-    term.moveTo(1, 2);
-    R.range(1,widthOfLine).forEach((i) => {
-        sb.put({x: i, y: 2}, "=");
-    });
+export let moveDown: (game: Game) => Game;
+moveDown = move([0, 1]);
+
+export let moveRight: (game: Game) => Game;
+moveRight = move([1, 0]);
+
+export let moveLeft: (game: Game) => Game;
+moveLeft = move([-1, 0]);
+
+// === Game loop
+const shouldAddNewApple = (game: Game) => {
+    const board: Board = R.view(boardLens, game);
+    const availableSpace = board.width * board.height;
+    const snake: Snake = R.view(snakeLens, game);
+    const apples: Apple[] = R.view(applesLens, game);
+    const usedSpace = snake.length + apples.length;
+
+    return usedSpace < availableSpace && game.prng() <= 0.1;
 };
 
-const drawWalls = game => {
-    const walls = getWalls(game);
-
-    const x = R.add(1);
-    const y = R.add(3);
-    R.forEach(wall => {
-        sb.moveTo(x(wall[0]), y(wall[1]));
-        sb.put({direction: 'none', attr: {color: 'red'}}, '█');
-    }, walls);
+const addAppleToRandomPosition = (game: Game): Game => {
+    const freePositions = getFreePositions(game);
+    const pos = freePositions[Math.floor(game.prng() * freePositions.length)];
+    const ttl = Math.floor(game.prng() * 20) + 30;
+    const newApple = { ttl, pos };
+    return R.over(applesLens, R.append(newApple), game);
 };
 
-const drawSnake = game => {
-    const snake = getSnake(game);
-    R.forEach(pos => {
-        const x = R.add(1);
-        const y = R.add(3);
-        sb.put({x: x(pos[0]), y: y(pos[1]), attr: {color: 'green', bgColor: 'black'}}, "X");
-    }, snake);
+let maybeAddNewApple: (game: Game) => Game;
+maybeAddNewApple = R.ifElse(
+    shouldAddNewApple,
+    addAppleToRandomPosition,
+    R.identity
+);
+
+let checkWallCollision: (game: Game) => Game;
+checkWallCollision = R.ifElse(
+    didCollideWithWall,
+    gameOver,
+    R.identity
+);
+
+let checkSnakeCollideWithSelf: (game: Game) => Game;
+checkSnakeCollideWithSelf = R.ifElse(
+    didSnakeCollideWithSelf,
+    gameOver,
+    R.identity
+);
+
+let checkAppleCollision: (game: Game) => Game;
+checkAppleCollision = R.ifElse(
+    didCollideWithApple,
+    R.compose(removeAppleAtSnakeHead, incScore, growSnake),
+    R.identity
+);
+
+const updateSnakePosition = (game: Game): Game => {
+    const dropTail = isSnakeAtTargetLength(game) ? R.drop(1) : R.identity;
+    const nextSnakePosition = getNextSnakePosition(game);
+
+    return R.over(
+        snakePositionLens,
+        R.compose(dropTail, R.append(nextSnakePosition)),
+        game
+    );
 };
 
-const drawApples = game => {
-    const apples = getApples(game);
-    R.forEach(pos => {
-        const x = R.add(1);
-        const y = R.add(3);
-        sb.moveTo(x(pos[0]), y(pos[1]));
-        sb.put({direction: 'none', attr: {color: 'green', bgColor: 'black'}}, '\u2605');
-    }, apples);
-};
+let checkAndHandleCollisions: (game: Game) => Game;
+checkAndHandleCollisions = R.compose(
+    checkWallCollision,
+    checkSnakeCollideWithSelf,
+    checkAppleCollision
+);
 
-const getSeed = () => Math.floor(Math.random()*Number.MAX_SAFE_INTEGER);
+export let tick: (game: Game) => Game;
+tick = R.ifElse(
+    isGameRunning,
+    R.compose(
+        maybeAddNewApple,
+        removeOldApples,
+        updateApplesTtl,
+        checkAndHandleCollisions,
+        updateSnakePosition,
+        updatePrevMovementVector
+    ),
+    R.identity
+);
 
-// === Run
-let game = newGame(getSeed());
+// === Public Getters
+export let getScore: (game: Game) => number;
+getScore = R.prop('score');
 
-term.hideCursor();
+export let getWalls: (game: Game) => Vector[];
+getWalls = getWallPositions;
 
-setInterval(() => {
-    sb.fill( {attr: {
-        color: 255 ,
-        bgColor: 0
-    } } ) ;
+export const getApples = R.compose(R.map(R.prop('pos')), R.view(applesLens)) as 
+    (game: Game) => Vector[];
 
-    game = tick(game);
+export let getSnake: (game: Game) => Vector[];
+getSnake = R.view(snakePositionLens);
 
-    drawHeader(game);
-    drawApples(game);
-    drawWalls(game);
-    drawSnake(game);
-
-    sb.draw({delta: true});
-}, 50);
-
-// Key handling
-term.grabInput(true) ;
-term.on('key', R.cond([
-    [R.equals('UP'), () => game = moveUp(game)],
-    [R.equals('DOWN'), () => game = moveDown(game)],
-    [R.equals('RIGHT'), () => game = moveRight(game)],
-    [R.equals('LEFT'), () => game = moveLeft(game)],
-    [R.equals('r'), () => game = newGame(getSeed())],
-    [R.equals('q'), terminate],
-    [R.equals('CTRL_C'), terminate]
-]));
+export let getStatus: (game: Game) => GameStatus;
+getStatus = R.prop('status');

@@ -1,8 +1,8 @@
 {
-  "name": "snake",
+  "name": "jsunconf-2019-snake-model",
   "version": "1.0.0",
-  "description": "JSUnconf snake game example",
-  "main": "build-node/model.js",
+  "description": "JSUnconf 2019 snake model",
+  "main": "build-node/index.js",
   "dependencies": {
     "ramda": "^0.26.1",
     "terminal-kit": "^1.27.2"

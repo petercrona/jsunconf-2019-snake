@@ -1,10 +1,10 @@
 import * as R from 'ramda';
-import { Vector, Game } from './types';
+import { Vector, Game, Apple } from './types';
 
 export const vectorAdd = (vec1: Vector, vec2: Vector) => [
     vec1[0] + vec2[0],
     vec1[1] + vec2[1]
-];
+] as Vector;
 
 const gameStatusLens = R.lensPath(['status']);
 const gameScoreLens = R.lensPath(['score']);
@@ -18,21 +18,33 @@ const prevMovementVectorLens = R.compose(snakeLens, R.lensPath(['prevMovementVec
 const boardLens = R.lensPath(['board']);
 const applesLens = R.compose(boardLens, R.lensPath(['apples']));
 
-const currentSnakeHead = R.compose(R.last, R.view(snakePositionLens));
-export const getNextSnakePosition = R.lift(vectorAdd)(
+let currentSnakeHead: (game: Game) => Vector
+currentSnakeHead = R.compose(R.last, R.view(snakePositionLens));
+
+export let getNextSnakePosition: (game: Game) => Vector;
+getNextSnakePosition = R.lift(vectorAdd)(
     R.view(movementVectorLens),
     currentSnakeHead
 );
 
-const getPositionsOccupiedBySnake = R.compose(R.length, R.view(snakePositionLens));
-export const isSnakeAtTargetLength = R.lift(R.equals)(
+let getPositionsOccupiedBySnake: (game: Game) => number;
+getPositionsOccupiedBySnake = R.compose(R.length, R.view(snakePositionLens));
+
+export let isSnakeAtTargetLength: (game: Game) => boolean;
+isSnakeAtTargetLength = R.lift(R.equals)(
     getPositionsOccupiedBySnake,
     R.view(snakeLengthLens)
 );
 
-const appleExpired = R.compose(R.equals(0), R.prop('ttl'));
-const decAppleTtl = R.over(R.lensProp('ttl'), R.dec);
-export const updateApplesTtl = R.over(applesLens, R.map(decAppleTtl));
+let appleExpired: (apple: Apple) => boolean;
+appleExpired = R.compose(R.equals(0), R.prop('ttl'));
+
+let decAppleTtl: (apple: Apple) => Apple;
+decAppleTtl = R.over(R.lensProp('ttl'), R.dec);
+
+export let updateApplesTtl: (game: Game) => Game;
+updateApplesTtl = R.over(applesLens, R.map(decAppleTtl));
+
 export const removeOldApples = R.over(applesLens, R.reject(appleExpired));
 
 export const getWallPositions = (game: Game) => {

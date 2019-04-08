@@ -1,6 +1,6 @@
 {
   "name": "jsunconf-snake",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "JSUnconf 2019 snake model",
   "main": "build/index.js",
   "types": "build/index.d.ts",

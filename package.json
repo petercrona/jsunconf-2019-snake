@@ -4,11 +4,10 @@
   "description": "JSUnconf 2019 snake model",
   "main": "build/index.js",
   "types": "build/index.d.ts",
+  "homepage": "https://github.com/petercrona/jsunconf-2019-snake",
   "dependencies": {
-    "@types/node": "^11.13.0",
     "@types/ramda": "^0.26.6",
     "ramda": "^0.26.1",
-    "terminal-kit": "^1.27.2",
     "typescript": "^3.4.1"
   },
   "scripts": {

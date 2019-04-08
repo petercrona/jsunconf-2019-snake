@@ -138,3 +138,9 @@ getSnake = R.view(snakePositionLens);
 
 export let getStatus: (game: Game) => GameStatus;
 getStatus = R.prop('status');
+
+export const getWidth = R.compose(R.prop('width'), R.view(boardLens)) as 
+    (game: Game) => number;
+
+export const getHeight = R.compose(R.prop('height'), R.view(boardLens)) as 
+    (game: Game) => number;

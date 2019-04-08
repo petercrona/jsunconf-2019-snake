@@ -27,3 +27,9 @@ export interface Apple {
     ttl: number,
     pos: Vector[]
 }
+
+export interface Configuration {
+    seed: number,
+    width: number,
+    height: number
+}

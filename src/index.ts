@@ -1,28 +1,28 @@
 import * as R from 'ramda';
 import { mb32 } from './prng';
-import { Board, Game, GameStatus, Snake, Vector, Apple } from './types';
+import { Board, Game, GameStatus, Snake, Vector, Apple, Configuration } from './types';
 import { didCollideWithApple, didCollideWithWall, didSnakeCollideWithSelf, gameOver, getFreePositions, getNextSnakePosition, getWallPositions, growSnake, incScore, isGameRunning, isSnakeAtTargetLength, move, removeAppleAtSnakeHead, removeOldApples, updateApplesTtl, updatePrevMovementVector } from './util';
 
 // === Constructors
 const newSnake = (): Snake => ({
-    movementVector: [0, 1],
-    prevMovementVector: [0, 1],
-    position: [[10, 5]],
+    movementVector: [1, 0],
+    prevMovementVector: [1, 0],
+    position: [[1, 1]],
     length: 4
 });
 
-const newBoard = (): Board => ({
-    width: 50,
-    height: 30,
+const newBoard = (config: Configuration): Board => ({
+    width: config.width,
+    height: config.height,
     apples: []
 });
 
-export const newGame = (seed: number): Game => ({
+export const newGame = (config: Configuration): Game => ({
     score: 0,
     status: 'GAME_RUNNING',
     snake: newSnake(),
-    board: newBoard(),
-    prng: mb32(seed)
+    board: newBoard(config),
+    prng: mb32(config.seed)
 });
 
 // === Lenses

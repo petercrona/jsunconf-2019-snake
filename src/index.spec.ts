@@ -19,7 +19,7 @@ describe("Snake Model", () => {
     expect(height).to.equal(15);
   });
 
-  it("two different seeds give to different values", () => {
+  it("two different seeds give to different games", () => {
     let game1 = createGame({ seed: 1 });
     let game2 = createGame({ seed: 2 });
 

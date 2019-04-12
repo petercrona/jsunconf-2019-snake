@@ -37,7 +37,10 @@ describe("Snake Model", () => {
   it("going into the top wall leads to game over", () => {
     let game = createGame();
     game = Snake.moveUp(game);
-    game = Snake.tick(game);
+
+    for (let i = 0; i < Snake.getHeight(game); i++) {
+      game = Snake.tick(game);
+    }
 
     const status = Snake.getStatus(game);
 

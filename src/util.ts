@@ -189,7 +189,7 @@ export const doesBoardHaveFreeSpace = (game: Game) => {
     return usedSpace < availableSpace;
 };
 
-export const findFreePosition = (game: Game) => {
+export const getRandomFreePosition = (game: Game) => {
     const freePositions = getFreePositions(game);
     return freePositions[Math.floor(game.prng() * freePositions.length)];
 }

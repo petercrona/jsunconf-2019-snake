@@ -1,7 +1,7 @@
 import * as R from 'ramda';
 import { mb32 } from './prng';
 import { Board, Game, GameStatus, Snake, Vector, Configuration } from './types';
-import { didCollideWithApple, didCollideWithWall, didSnakeCollideWithSelf, gameOver, getNextSnakePosition, getWallPositions, growSnake, incScore, isGameRunning, isSnakeAtTargetLength, move, removeAppleAtSnakeHead, removeOldApples, updateApplesTtl, updatePrevMovementVector, doesBoardHaveFreeSpace, findFreePosition, createApple } from './util';
+import { didCollideWithApple, didCollideWithWall, didSnakeCollideWithSelf, gameOver, getNextSnakePosition, getWallPositions, growSnake, incScore, isGameRunning, isSnakeAtTargetLength, move, removeAppleAtSnakeHead, removeOldApples, updateApplesTtl, updatePrevMovementVector, doesBoardHaveFreeSpace, getRandomFreePosition, createApple } from './util';
 
 // === Constructors
 const newSnake = (): Snake => ({
@@ -51,7 +51,7 @@ const shouldAddNewApple = R.allPass([
 ]);
 
 const addAppleToRandomPosition = (game: Game): Game => {
-    const pos = findFreePosition(game);
+    const pos = getRandomFreePosition(game);
     const newApple = createApple(game, pos);
     return R.over(applesLens, R.append(newApple), game);
 };

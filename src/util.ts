@@ -18,7 +18,7 @@ const prevMovementVectorLens = R.compose(snakeLens, R.lensPath(['prevMovementVec
 const boardLens = R.lensPath(['board']);
 const applesLens = R.compose(boardLens, R.lensPath(['apples'])) as R.Lens;
 
-const currentSnakeHead = R.compose(R.last, R.view(snakePositionLens)) as 
+const currentSnakeHead = R.compose(R.last, R.view(snakePositionLens)) as
     unknown as (game: Game) => Vector;
 
 export let getNextSnakePosition: (game: Game) => Vector;
@@ -88,7 +88,7 @@ export const getFreePositions = (game: Game) => {
     }, apples);
 
     return R.filter(
-        R.identity as (a: any) => boolean, 
+        R.identity as (a: any) => boolean,
         R.values(possiblyFree)
     ) as Vector[];
 };
@@ -104,10 +104,10 @@ export const getApplePositions = R.compose(
     R.view(applesLens)
 ) as (game: Game) => Vector[];
 
-const getSnakeHead = R.compose(R.last, R.view(snakePositionLens)) as 
+const getSnakeHead = R.compose(R.last, R.view(snakePositionLens)) as
     unknown as (game: Game) => Vector;
 
-export const getSnakeTail = R.compose(R.init, R.view(snakePositionLens)) as 
+export const getSnakeTail = R.compose(R.init, R.view(snakePositionLens)) as
     unknown as (game: Game) => Vector[];
 
 export let gameOver: (game: Game) => Game;
@@ -141,7 +141,7 @@ getX = R.nth(0);
 let getY: (vector: Vector) => number;
 getY = R.nth(1);
 
-const getBoardWidth = R.compose(R.prop('width'), R.view(boardLens)) as 
+const getBoardWidth = R.compose(R.prop('width'), R.view(boardLens)) as
     (game: Game) => number;
 
 const getBoardHeight = R.compose(R.prop('height'), R.view(boardLens)) as
@@ -178,3 +178,23 @@ updatePrevMovementVector = R.lift(R.set(prevMovementVectorLens))(
     R.view(movementVectorLens),
     R.identity
 );
+
+export const doesBoardHaveFreeSpace = (game: Game) => {
+    const board: Board = R.view(boardLens, game);
+    const availableSpace = board.width * board.height;
+    const snake: Snake = R.view(snakeLens, game);
+    const apples: Apple[] = R.view(applesLens, game);
+    const usedSpace = snake.length + apples.length;
+
+    return usedSpace < availableSpace;
+};
+
+export const findFreePosition = (game: Game) => {
+    const freePositions = getFreePositions(game);
+    return freePositions[Math.floor(game.prng() * freePositions.length)];
+}
+
+export const createApple = (game: Game, pos: [number, number]) => {
+    const ttl = Math.floor(game.prng() * 20) + 30;
+    return { ttl, pos } as Apple;
+}

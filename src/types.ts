@@ -25,7 +25,7 @@ export interface Board {
 
 export interface Apple {
     ttl: number,
-    pos: Vector[]
+    pos: Vector
 }
 
 export interface Configuration {

@@ -104,7 +104,7 @@ describe("Snake Model", () => {
     expect(score).to.equal(1);
   });
 
-  it("Eating an apple increase the snake positions by 1", () => {
+  it("Eating an apple grows the snake by 1 position", () => {
     let game = runEatApple();
     game = Snake.tick(game);
 
